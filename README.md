@@ -1,13 +1,13 @@
 # Socket
 
-This is the code I've created to practice with C sockets, you can use it to send files over the network. 
+This is the code I've created to practice with C sockets, you can use it to send and receive files over the network. 
 It can act both as a server or client.
 
 The server listens on a port (the firewall should accept incoming connections from that port).
 The client connects to the server via specified ip address and port number, then it asks whether to send or receive a file.
 
-At this point, if sending a file, you write the file path, the filename and its size are determined and send to the other peer.
-File is sent (and received) in 1024 bytes chunks. The other peer retrieves the file information and saves the file as received_filename.
+At this point, if sending a file, you write the file path, then the filename and its size are determined and sent to the other peer.
+File is sent (and received) in 1024 bytes chunks. The other peer retrieves file information and saves the file as received_filename.
 
 ###How to build and use
 
