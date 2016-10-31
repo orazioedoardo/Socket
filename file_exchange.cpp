@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
+#include <libgen.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -24,40 +25,13 @@ void generic_write(int &my_socket, char my_data[], size_t my_data_size){
 	}
 }
 
-size_t get_file_size(char file_path[]){
+size_t filesize(char file_path[]){
    
     struct stat st;
     stat(file_path, &st);
 
     size_t num_size = st.st_size;
    	return num_size;
-}
-
-void get_file_name(char file_path[], char file_name[]){
-	
-	int pos = 0, i, j;
-	for (i = strlen(file_path)-1; i >= 0; i--){
-		if (file_path[i] == '/'){
-			pos = i-1;
-			break;
-		} else {
-			pos = -2;
-		}
-	}
-
-	for (i = pos+2, j = 0; file_path[i]; i++, j++){
-		file_name[j] = file_path[i];
-	}
-	file_name[j++] = 0;
-}
-
-void get_save_name(char file_name[], char save_name[]){
-	
-	int j = 9;
-	for (int i = 0; file_name[i]; i++, j++){
-		save_name[j] = file_name[i];
-	}
-	save_name[j++] = 0;
 }
 
 int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
@@ -76,11 +50,13 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
     	return 1;
 	}
 
-	//Find file size
-	num_size = get_file_size(file_path);
+	//Find file size from path
+	num_size = filesize(file_path);
 	sprintf(file_size, "%zu", num_size);
 
-	get_file_name(file_path, file_name);
+	//Find file name from path
+	strlcpy(file_name, basename(file_path), sizeof(file_name));
+
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
 	//Send file name and file size to server
@@ -105,16 +81,19 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 
 	FILE * file;
-	char file_name[64], save_name[64] = "received_", file_size[16];
+	char file_name[64], save_name[64+9] = "received_", file_size[16];
 	size_t current_data, read_data = 0, num_size;
 
 	//Receive file name and file size from server
 	generic_read(my_socket, file_name, sizeof(file_name));
 	generic_read(my_socket, file_size, sizeof(file_size));
 
+	//Convert file size from string to size_t
 	sscanf(file_size, "%zu", &num_size);
 	
-	get_save_name(file_name, save_name);
+	//Prepend "received_" to file name
+	strlcat(save_name, file_name, sizeof(save_name));
+
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
 	file = fopen(save_name, "w");
