@@ -37,7 +37,7 @@ size_t filesize(char file_path[]){
 int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	
 	FILE * file;
-	char file_path[256], file_name[64], file_size[16];
+	char file_path[256], file_name[256], file_size[16];
 	size_t current_data, written_data = 0, num_size;
 	
 	//Ask for a file
@@ -52,10 +52,12 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 
 	//Find file size from path
 	num_size = filesize(file_path);
+
+	//Convert file size from size_t to string
 	sprintf(file_size, "%zu", num_size);
 
 	//Find file name from path
-	strlcpy(file_name, basename(file_path), sizeof(file_name));
+	strncpy(file_name, basename(file_path), sizeof(file_name));
 
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
@@ -81,7 +83,7 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 
 	FILE * file;
-	char file_name[64], save_name[64+9] = "received_", file_size[16];
+	char file_name[256], save_name[256+9] = "received_", file_size[16];
 	size_t current_data, read_data = 0, num_size;
 
 	//Receive file name and file size from server
@@ -92,7 +94,7 @@ int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	sscanf(file_size, "%zu", &num_size);
 	
 	//Prepend "received_" to file name
-	strlcat(save_name, file_name, sizeof(save_name));
+	strncat(save_name, file_name, sizeof(save_name) - strlen(save_name) - 1);
 
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
