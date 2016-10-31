@@ -76,7 +76,7 @@ int main(int argc, char * argv[]){
 		listen_for_client(my_listener);
 
 		//Accept client
-		accept_client(my_socket, my_listener, my_server, my_client);
+		accept_client(my_socket, my_listener, my_client);
 
 		//Get option from client
 		generic_read(my_socket, option, sizeof(option));
