@@ -44,4 +44,4 @@ Data sent
 Tested on OS X and Linux.
 To check whether the server is actually listening or not run ```lsof -i -P | grep socket``` on Mac or ```sudo netstat -antp | grep socket``` on Linux.
 
-The connection is unencrypted so avoid using it over WAN, also there is no integrity check. Improvements that could be made are the ability to deal with multiple clients, addition of checks on argv, filepath parsing, file I/O and error syncronizations between client and server.
+The connection is unencrypted so avoid using it over WAN, also there is no integrity check. Improvements that could be made are the ability to deal with multiple clients, addition of checks on argv, file I/O and error syncronizations between client and server.
