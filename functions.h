@@ -5,7 +5,7 @@ void create_socket(int &my_listener);
 void bind_port(int &my_listener, sockaddr_in &my_server);
 
 void listen_for_client(int &my_listener);
-void accept_client(int &my_socket, int &my_listener, sockaddr_in &my_server, sockaddr_in &my_client);
+void accept_client(int &my_socket, int &my_listener, sockaddr_in &my_client);
 
 //File exchange
 void generic_read(int &my_socket, char data[], size_t data_size);
