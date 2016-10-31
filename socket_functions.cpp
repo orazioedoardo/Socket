@@ -46,7 +46,7 @@ void listen_for_client(int &my_listener){
 	}
 }
 
-void accept_client(int &my_socket, int &my_listener, sockaddr_in &my_server, sockaddr_in &my_client){
+void accept_client(int &my_socket, int &my_listener, sockaddr_in &my_client){
 	
 	socklen_t my_client_size = sizeof(my_client);
 	if ((my_socket = accept(my_listener, (sockaddr *) &my_client, &my_client_size)) < 0){
