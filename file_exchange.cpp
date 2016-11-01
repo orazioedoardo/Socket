@@ -11,7 +11,7 @@ using namespace std;
 
 void generic_read(int &my_socket, char my_data[], size_t my_data_size){
 	
-	if (read(my_socket, my_data, my_data_size) < 0){
+	if (read(my_socket, my_data, my_data_size) <= 0){
 		cout << "Read error" << endl;
 		exit(1);
 	}
@@ -19,7 +19,7 @@ void generic_read(int &my_socket, char my_data[], size_t my_data_size){
 
 void generic_write(int &my_socket, char my_data[], size_t my_data_size){
 	
-	if (write(my_socket, my_data, my_data_size) < 0){
+	if (write(my_socket, my_data, my_data_size) <= 0){
 		cout << "Write error" << endl;
 		exit(1);
 	}
@@ -37,7 +37,7 @@ size_t filesize(char file_path[]){
 int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	
 	FILE * file;
-	char file_path[256], file_name[256], file_size[16];
+	char file_path[256], file_name[256] = {0}, file_size[16];
 	size_t current_data, written_data = 0, num_size;
 	
 	//Ask for a file
@@ -54,10 +54,10 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	num_size = filesize(file_path);
 
 	//Convert file size from size_t to string
-	sprintf(file_size, "%zu", num_size);
+	snprintf(file_size, sizeof(file_size), "%zu", num_size);
 
 	//Find file name from path
-	strncpy(file_name, basename(file_path), sizeof(file_name));
+	strncat(file_name, basename(file_path), sizeof(file_name) - 1);
 
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
@@ -68,12 +68,21 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	//Send actual data
 	while ((current_data = fread(my_buffer, 1, my_buffer_size, file)) > 0){
 
-		write(my_socket, my_buffer, current_data);
+		if (write(my_socket, my_buffer, current_data) == 0){
+			cout << endl << "Write error" << endl;
+			exit(1);
+		}
 		written_data += current_data;
 		
 		cout << "Sending data... " << written_data << "/" << file_size << "\r" << flush;
 	}
-	cout << endl << "Data sent" << endl;
+
+	if (written_data == num_size){
+		cout << endl << "Data sent" << endl;
+	} else {
+		cout << endl << "Failed to send" << endl;
+	}
+
 	fclose(file);
 	close(my_socket);
 
@@ -107,13 +116,23 @@ int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	//Receive actual data
 	while (read_data < num_size){
 
-		current_data = read(my_socket, my_buffer, my_buffer_size);
+		if ((current_data = read(my_socket, my_buffer, my_buffer_size)) == 0){
+			cout << endl << "Read error" << endl;
+			exit(1);
+		}
 		read_data += current_data;
+
 		fwrite(my_buffer, 1, current_data, file);
 			
 		cout << "Receiving data... " << read_data << "/" << file_size << "\r" << flush;
 	}
-	cout << endl << "Data received" << endl;
+
+	if (read_data == num_size){
+		cout << endl << "Data received" << endl;
+	} else {
+		cout << endl << "Failed to receive" << endl;
+	}
+
 	fclose(file);
 	close(my_socket);
 
