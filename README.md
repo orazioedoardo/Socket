@@ -7,7 +7,7 @@ The server listens on a port (the firewall should accept incoming connections fr
 The client connects to the server via specified ip address and port number, then it asks whether to send or receive a file.
 
 At this point, if sending a file, you write the file path, then the filename and its size are determined and sent to the other peer.
-File is sent (and received) in 1024 bytes chunks. The other peer retrieves file information and saves the file as received_filename.
+File is sent (and received) in 1024 bytes chunks. The other peer retrieves file information and saves the file. If a file with the same name already exists in the folder, a random string is prepended to the file name.
 
 ###How to build and use
 
@@ -44,4 +44,4 @@ Data sent
 Tested on OS X and Linux.
 To check whether the server is actually listening or not run ```lsof -i -P | grep socket``` on Mac or ```sudo netstat -antp | grep socket``` on Linux.
 
-The connection is unencrypted so avoid using it over WAN, also there is no integrity check. Improvements that could be made are the ability to deal with multiple clients, addition of checks on argv, file I/O and error syncronizations between client and server.
+The connection is unencrypted so avoid using it over WAN, also there is no integrity check. Improvements that could be made are the ability to deal with multiple clients, addition of checks on argv, file I/O and error management.
