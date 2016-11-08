@@ -30,8 +30,8 @@ int main(int argc, char * argv[]){
 
 		//Fill server parameters
 		my_server.sin_family = AF_INET;
-		my_server.sin_port = htons(atoi(argv[3]));
 		my_server.sin_addr.s_addr = inet_addr(argv[2]);
+		my_server.sin_port = htons(atoi(argv[3]));
 
 		//Socket creation
 		create_socket(my_socket);
@@ -44,7 +44,7 @@ int main(int argc, char * argv[]){
 		cin.getline(option, sizeof(option));
 
 		//Send option to server
-		generic_write(my_socket, option, sizeof(option));
+		socket_write(my_socket, option, sizeof(option));
 		
 		//Main routine
 		if (option[0] == '1'){
@@ -79,7 +79,7 @@ int main(int argc, char * argv[]){
 		accept_client(my_socket, my_listener, my_client);
 
 		//Get option from client
-		generic_read(my_socket, option, sizeof(option));
+		socket_read(my_socket, option, sizeof(option));
 
 		//Main routine
 		if (option[0] == '1'){
