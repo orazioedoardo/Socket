@@ -63,7 +63,7 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	//Convert file size from number to string
 	snprintf(file_size, sizeof(file_size), "%zu", num_size);
 
-	//Find file name from path
+	//Find file name from file path
 	strncat(file_name, basename(file_path), sizeof(file_name) - 1);
 
 	cout << file_name << " is " << file_size << " bytes" << endl;
@@ -111,15 +111,12 @@ int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
-	if (file_exists(file_name) == 0){
-		//If file name exists prepend a random string to save name
-		rnd_str(save_name);
-		strncat(save_name, file_name, sizeof(save_name) - strlen(save_name) - 1);
-	} else {
-		//Otherwhise use file name as save name
-		strncat(save_name, file_name, sizeof(save_name) - 1);
-	}
-
+	//If file name exists generate a random string
+	if (file_exists(file_name) == 0) rnd_str(save_name);
+	
+	//Append file name to save name
+	strncat(save_name, file_name, sizeof(save_name) - strlen(save_name) - 1);
+	
 	file = fopen(save_name, "w");
 	if (file == 0){
 		cerr << "Unable to open file" << endl;
