@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <limits>
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -10,7 +11,7 @@ using namespace std;
 int main(int argc, char * argv[]){
 
 	int my_listener, my_socket;
-	char my_buffer[1024], option[2];
+	char my_buffer[1024], option;
 	
 	sockaddr_in my_server, my_client;
 
@@ -41,15 +42,18 @@ int main(int argc, char * argv[]){
 		
 		//Ask whether to send or receive
 		cout << "Send or receive file? [1/2] ";
-		cin.getline(option, sizeof(option));
+		cin >> option;
+
+		//Ignore the new line character left in the stream
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
 		//Send option to server
-		socket_write(my_socket, option, sizeof(option));
+		socket_write(my_socket, &option, 1);
 		
 		//Main routine
-		if (option[0] == '1'){
+		if (option == '1'){
 			send_file(my_socket, my_buffer, sizeof(my_buffer));
-		} else if (option[0] == '2'){
+		} else if (option == '2'){
 			receive_file(my_socket, my_buffer, sizeof(my_buffer));
 		}
 
@@ -79,12 +83,12 @@ int main(int argc, char * argv[]){
 		accept_client(my_socket, my_listener, my_client);
 
 		//Get option from client
-		socket_read(my_socket, option, sizeof(option));
+		socket_read(my_socket, &option, 1);
 
 		//Main routine
-		if (option[0] == '1'){
+		if (option == '1'){
 			receive_file(my_socket, my_buffer, sizeof(my_buffer));
-		} else if (option[0] == '2'){
+		} else if (option == '2'){
 			send_file(my_socket, my_buffer, sizeof(my_buffer));
 		}
 

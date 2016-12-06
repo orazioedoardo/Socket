@@ -57,7 +57,9 @@ void accept_client(int &my_socket, int &my_listener, sockaddr_in &my_client){
 	}
 }
 
-void socket_read(int &my_socket, char my_data[], size_t my_data_size){
+//We are assuming that no data means an error, hence "<= 0" for both
+
+void socket_read(int &my_socket, void * my_data, uint16_t my_data_size){
 	
 	if (read(my_socket, my_data, my_data_size) <= 0){
 		cerr << "Read error" << endl;
@@ -65,8 +67,8 @@ void socket_read(int &my_socket, char my_data[], size_t my_data_size){
 	}
 }
 
-void socket_write(int &my_socket, char my_data[], size_t my_data_size){
-	
+void socket_write(int &my_socket, void * my_data, uint16_t my_data_size){
+
 	if (write(my_socket, my_data, my_data_size) <= 0){
 		cerr << "Write error" << endl;
 		exit(1);

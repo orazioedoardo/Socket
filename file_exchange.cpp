@@ -32,20 +32,21 @@ int file_exists(char file_path[]){
 	return stat(file_path, &st);
 }
 
-size_t filesize(char file_path[]){
+uint64_t filesize(char file_path[]){
    
 	struct stat st;
 	stat(file_path, &st);
 
-	size_t num_size = st.st_size;
-	return num_size;
+	uint64_t file_size = st.st_size;
+	return file_size;
 }
 
-int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
+int send_file(int &my_socket, char my_buffer[], uint16_t my_buffer_size){
 	
 	FILE * file;
-	char file_path[256], file_name[256] = {0}, file_size[16];
-	size_t current_data, written_data = 0, num_size;
+	char file_path[256], file_name[256] = {0};
+	int16_t socket_data, file_data;
+	uint64_t sent_data = 0, file_size;
 	
 	//Ask for a file
 	cout << "Choose a file: ";
@@ -58,10 +59,7 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	}
 
 	//Find file size from file path
-	num_size = filesize(file_path);
-
-	//Convert file size from number to string
-	snprintf(file_size, sizeof(file_size), "%zu", num_size);
+	file_size = filesize(file_path);
 
 	//Find file name from file path
 	strncat(file_name, basename(file_path), sizeof(file_name) - 1);
@@ -70,21 +68,25 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 
 	//Send file name and file size to server
 	socket_write(my_socket, file_name, sizeof(file_name));
-	socket_write(my_socket, file_size, sizeof(file_size));
+	socket_write(my_socket, &file_size, sizeof(file_size));
 
 	//Send actual data
-	while ((current_data = fread(my_buffer, 1, my_buffer_size, file)) > 0){
+	while (sent_data < file_size){
 
-		if (write(my_socket, my_buffer, current_data) == 0){
-			cerr << endl << "Write error" << endl;
-			exit(1);
+		file_data = fread(my_buffer, 1, my_buffer_size, file);
+		socket_data = write(my_socket, my_buffer, file_data);
+
+		if (file_data != socket_data){
+			cerr << endl << "Size mismatch" << endl;
+			return 1;
 		}
-		written_data += current_data;
+
+		sent_data += socket_data;
 		
-		cout << "Sending data... " << written_data << "/" << file_size << "\r" << flush;
+		cout << "Sending data... " << sent_data << "/" << file_size << "\r" << flush;
 	}
 
-	if (written_data == num_size){
+	if (sent_data == file_size){
 		cout << endl << "Data sent" << endl;
 	} else {
 		cerr << endl << "Failed to send" << endl;
@@ -96,18 +98,16 @@ int send_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	return 0;
 }
 
-int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
+int receive_file(int &my_socket, char my_buffer[], uint16_t my_buffer_size){
 
 	FILE * file;
-	char file_name[256], save_name[256+10] = {0}, file_size[16];
-	size_t current_data, read_data = 0, num_size;
+	char file_name[256], save_name[256+10] = {0};
+	int16_t socket_data, file_data;
+	uint64_t received_data = 0, file_size;
 
 	//Receive file name and file size from server
 	socket_read(my_socket, file_name, sizeof(file_name));
-	socket_read(my_socket, file_size, sizeof(file_size));
-
-	//Convert file size from string to number
-	sscanf(file_size, "%zu", &num_size);
+	socket_read(my_socket, &file_size, sizeof(file_size));
 
 	cout << file_name << " is " << file_size << " bytes" << endl;
 
@@ -124,20 +124,22 @@ int receive_file(int &my_socket, char my_buffer[], size_t my_buffer_size){
 	}
 
 	//Receive actual data
-	while (read_data < num_size){
+	while (received_data < file_size){
 
-		if ((current_data = read(my_socket, my_buffer, my_buffer_size)) == 0){
-			cerr << endl << "Read error" << endl;
-			exit(1);
+		socket_data = read(my_socket, my_buffer, my_buffer_size);
+		file_data = fwrite(my_buffer, 1, socket_data, file);
+
+		if (socket_data != file_data){
+			cerr << endl << "Size mismatch" << endl;
+			return 1;
 		}
-		read_data += current_data;
 
-		fwrite(my_buffer, 1, current_data, file);
+		received_data += file_data;
 			
-		cout << "Receiving data... " << read_data << "/" << file_size << "\r" << flush;
+		cout << "Receiving data... " << received_data << "/" << file_size << "\r" << flush;
 	}
 
-	if (read_data == num_size){
+	if (received_data == file_size){
 		cout << endl << "Data received" << endl;
 	} else {
 		cerr << endl << "Failed to receive" << endl;
