@@ -3,7 +3,7 @@
 This is the code I've created to practice with C sockets, you can use it to send and receive files over the network. 
 It can act both as a server or client, once the connection is estabilished, the file exchange is bidirectional.
 
-###Example
+### Example
 
 ```
 server$ ./socket -l 4444 -r
@@ -25,7 +25,7 @@ Sending data... 52428800 / 52428800
 Data sent
 ```
 
-###Additional information
+### Additional information
 
 Tested on OS X and Linux.
 To check whether the server is actually listening or not run ```lsof -i -P | grep socket``` on Mac or ```sudo netstat -antp | grep socket``` on Linux.
